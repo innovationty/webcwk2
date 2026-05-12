@@ -3,7 +3,7 @@ from __future__ import annotations
 import time
 from collections import deque
 from dataclasses import dataclass, field
-from typing import Iterable
+from typing import Callable, Iterable
 from urllib.parse import urldefrag, urljoin, urlparse
 
 import requests
@@ -39,6 +39,12 @@ class WebCrawler:
         self._root_netloc = urlparse(start_url).netloc
 
     def crawl(self) -> CrawlReport:
+        return self.crawl_with_progress()
+
+    def crawl_with_progress(
+        self,
+        on_page_crawled: Callable[[CrawledPage, int, int], None] | None = None,
+    ) -> CrawlReport:
         queue: deque[str] = deque([self._normalise_url(self.start_url)])
         visited: set[str] = set()
         report = CrawlReport()
@@ -58,6 +64,8 @@ class WebCrawler:
 
             page = self._parse_page(current_url, response.text, response.status_code)
             report.pages.append(page)
+            if on_page_crawled is not None:
+                on_page_crawled(page, len(report.pages), len(queue))
 
             for link in page.links:
                 if link not in visited:

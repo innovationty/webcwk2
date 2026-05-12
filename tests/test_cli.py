@@ -77,7 +77,11 @@ def test_handle_build_and_load(monkeypatch, capsys, tmp_path: Path) -> None:
         pages = [object(), object()]
         errors = {}
 
-    monkeypatch.setattr(shell.engine, "build", lambda output_path: (FakeReport(), fake_path))
+    monkeypatch.setattr(
+        shell.engine,
+        "build",
+        lambda output_path, on_page_crawled=None: (FakeReport(), fake_path),
+    )
     monkeypatch.setattr(shell.engine, "load", lambda path: object())
     monkeypatch.setattr("search_tool.cli.DEFAULT_INDEX_PATH", fake_path)
 

@@ -19,8 +19,10 @@ This project implements a command-line search tool for `https://quotes.toscrape.
 Create or activate a Python 3.12 environment and install dependencies:
 
 ```bash
-pip install -e .[dev]
+python -m pip install -e ".[dev]"
 ```
+
+On Windows PowerShell, keep the local path argument after `-e` and quote `.[dev]` exactly as shown above.
 
 ## Usage
 
@@ -29,6 +31,8 @@ Run the interactive shell:
 ```bash
 python -m search_tool
 ```
+
+The `build` command crawls the live target website and respects a 6-second politeness window, so a full crawl can take a long time. The shell now prints per-page crawl progress during indexing.
 
 Available commands:
 

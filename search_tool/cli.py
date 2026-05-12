@@ -61,10 +61,25 @@ class SearchShell:
 
     def _handle_build(self) -> None:
         print("Building index. This respects the 6-second politeness window and may take time.")
-        report, path = self.engine.build(output_path=DEFAULT_INDEX_PATH)
+        report, path = self.engine.build(
+            output_path=DEFAULT_INDEX_PATH,
+            on_page_crawled=self._report_build_progress,
+        )
         print(f"Indexed {len(report.pages)} pages and saved to {path}.")
         if report.errors:
             print(f"Completed with {len(report.errors)} crawl errors.")
+
+    def _report_build_progress(
+        self,
+        url: str,
+        title: str,
+        crawled_count: int,
+        queued_count: int,
+    ) -> None:
+        print(
+            f"Crawled page {crawled_count} | queued={queued_count} | title={title} | url={url}",
+            flush=True,
+        )
 
     def _handle_load(self) -> None:
         path = Path(DEFAULT_INDEX_PATH)

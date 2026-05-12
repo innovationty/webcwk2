@@ -21,7 +21,9 @@ def test_engine_build_uses_crawler_and_persists_index(monkeypatch, tmp_path: Pat
             self.start_url = start_url
             self.politeness_window = politeness_window
 
-        def crawl(self) -> CrawlReport:
+        def crawl_with_progress(self, on_page_crawled=None) -> CrawlReport:
+            if on_page_crawled is not None:
+                on_page_crawled(report.pages[0], 1, 0)
             return report
 
     monkeypatch.setattr("search_tool.engine.WebCrawler", FakeCrawler)
