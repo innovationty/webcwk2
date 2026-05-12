@@ -119,6 +119,18 @@ def test_shell_handles_keyboard_interrupt(monkeypatch, capsys) -> None:
     assert "Interrupted." in output
 
 
+def test_shell_handles_invalid_command_syntax(monkeypatch, capsys) -> None:
+    commands = iter(['find "good friends', "exit"])
+    monkeypatch.setattr("builtins.input", lambda _: next(commands))
+
+    shell = SearchShell()
+    result = shell.run()
+
+    output = capsys.readouterr().out
+    assert result == 0
+    assert "Invalid command syntax" in output
+
+
 def test_handle_print_usage_and_no_results(monkeypatch, capsys) -> None:
     shell = SearchShell()
     shell._handle_print([])

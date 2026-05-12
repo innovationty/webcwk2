@@ -39,7 +39,12 @@ class SearchShell:
             if not line:
                 continue
 
-            command, *args = shlex.split(line)
+            try:
+                command, *args = shlex.split(line)
+            except ValueError as exc:
+                print(f"Invalid command syntax: {exc}")
+                continue
+
             command = command.lower()
 
             try:

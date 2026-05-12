@@ -1,4 +1,5 @@
 from pathlib import Path
+import json
 
 from search_tool.engine import SearchEngine
 from search_tool.indexer import InvertedIndex
@@ -61,6 +62,31 @@ def test_engine_load_and_print_term(tmp_path: Path) -> None:
 
     postings = engine.print_term("nonsense")
     assert "https://example.test/page-1" in postings
+
+
+def test_engine_load_missing_file_raises_runtime_error(tmp_path: Path) -> None:
+    engine = SearchEngine()
+
+    try:
+        engine.load(tmp_path / "missing.json")
+    except RuntimeError as exc:
+        assert "not found" in str(exc).lower()
+    else:
+        raise AssertionError("Expected RuntimeError for missing index file")
+
+
+def test_engine_load_invalid_json_raises_runtime_error(tmp_path: Path) -> None:
+    path = tmp_path / "broken.json"
+    path.write_text("{not valid json", encoding="utf-8")
+
+    engine = SearchEngine()
+
+    try:
+        engine.load(path)
+    except RuntimeError as exc:
+        assert "invalid json" in str(exc).lower()
+    else:
+        raise AssertionError("Expected RuntimeError for invalid JSON index file")
 
 
 def test_engine_stats_after_load(tmp_path: Path) -> None:

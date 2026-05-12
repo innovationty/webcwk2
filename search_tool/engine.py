@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 from typing import Callable
 
@@ -38,7 +39,14 @@ class SearchEngine:
         return report, path
 
     def load(self, path: Path = DEFAULT_INDEX_PATH) -> InvertedIndex:
-        self.index = load_index(path)
+        try:
+            self.index = load_index(path)
+        except FileNotFoundError as exc:
+            raise RuntimeError(f"Index file not found: {path}. Run 'build' first.") from exc
+        except json.JSONDecodeError as exc:
+            raise RuntimeError(f"Index file is invalid JSON: {path}.") from exc
+        except OSError as exc:
+            raise RuntimeError(f"Unable to load index file: {path}. {exc}") from exc
         return self.index
 
     def print_term(self, term: str) -> dict[str, dict[str, object]]:
