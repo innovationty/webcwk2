@@ -42,6 +42,7 @@ Available commands:
 - `find indifference` finds ranked pages containing the term.
 - `find good friends` performs an AND search across all query terms.
 - `find "good friends"` performs a phrase query.
+- `stats` prints summary statistics for the loaded index.
 - `help` prints command help.
 - `exit` quits the shell.
 

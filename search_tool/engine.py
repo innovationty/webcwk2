@@ -56,6 +56,16 @@ class SearchEngine:
         assert self.index is not None
         return self.index.suggest(query)
 
+    def stats(self) -> dict[str, int]:
+        self._require_index()
+        assert self.index is not None
+        total_tokens = sum(int(document["length"]) for document in self.index.documents.values())
+        return {
+            "documents": self.index.document_count,
+            "vocabulary": len(self.index.vocabulary),
+            "tokens": total_tokens,
+        }
+
     def _require_index(self) -> None:
         if self.index is None:
             raise RuntimeError("Index not loaded. Run 'build' or 'load' first.")

@@ -162,3 +162,37 @@ def test_handle_build_reports_errors(monkeypatch, capsys, tmp_path: Path) -> Non
 
     output = capsys.readouterr().out
     assert "Completed with 1 crawl errors." in output
+
+
+def test_handle_stats_outputs_summary(monkeypatch, capsys) -> None:
+    shell = SearchShell()
+    monkeypatch.setattr(
+        shell.engine,
+        "stats",
+        lambda: {"documents": 12, "vocabulary": 345, "tokens": 6789},
+    )
+
+    shell._handle_stats()
+
+    output = capsys.readouterr().out
+    assert "documents=12" in output
+    assert "vocabulary=345" in output
+    assert "tokens=6789" in output
+
+
+def test_shell_stats_then_exit(monkeypatch, capsys) -> None:
+    commands = iter(["stats", "exit"])
+    monkeypatch.setattr("builtins.input", lambda _: next(commands))
+
+    shell = SearchShell()
+    monkeypatch.setattr(
+        shell.engine,
+        "stats",
+        lambda: {"documents": 1, "vocabulary": 2, "tokens": 3},
+    )
+
+    result = shell.run()
+
+    output = capsys.readouterr().out
+    assert result == 0
+    assert "Index stats" in output

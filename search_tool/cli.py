@@ -12,6 +12,7 @@ HELP_TEXT = """Commands:
   load               Load an existing index from disk.
   print <word>       Print postings for one word.
   find <query>       Search the index. Use quotes for phrase search.
+    stats              Show index summary statistics.
   help               Show this help text.
   exit               Quit the shell.
 """
@@ -50,6 +51,8 @@ class SearchShell:
                     self._handle_print(args)
                 elif command == "find":
                     self._handle_find(args)
+                elif command == "stats":
+                    self._handle_stats()
                 elif command == "help":
                     print(HELP_TEXT)
                 elif command in {"exit", "quit"}:
@@ -117,6 +120,15 @@ class SearchShell:
 
         for rank, result in enumerate(results, start=1):
             print(f"{rank}. {result.title} | {result.url} | score={result.score:.4f}")
+
+    def _handle_stats(self) -> None:
+        stats = self.engine.stats()
+        print(
+            "Index stats | "
+            f"documents={stats['documents']} | "
+            f"vocabulary={stats['vocabulary']} | "
+            f"tokens={stats['tokens']}"
+        )
 
 
 def main() -> int:
