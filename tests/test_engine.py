@@ -31,3 +31,33 @@ def test_engine_requires_index_before_search() -> None:
         assert "build" in str(exc).lower()
     else:
         raise AssertionError("Expected RuntimeError when index is not loaded")
+
+
+def test_engine_requires_index_before_print_and_suggest() -> None:
+    engine = SearchEngine()
+
+    for action in (lambda: engine.print_term("anything"), lambda: engine.suggest("anything")):
+        try:
+            action()
+        except RuntimeError as exc:
+            assert "build" in str(exc).lower()
+        else:
+            raise AssertionError("Expected RuntimeError when index is not loaded")
+
+
+def test_engine_load_and_print_term(tmp_path: Path) -> None:
+    pages = [
+        CrawledPage(
+            url="https://example.test/page-1",
+            title="Page 1",
+            text="Nonsense stays nonsense.",
+        )
+    ]
+    index = InvertedIndex.from_pages(pages)
+    path = save_index(index, tmp_path / "search_index.json")
+
+    engine = SearchEngine()
+    engine.load(path)
+
+    postings = engine.print_term("nonsense")
+    assert "https://example.test/page-1" in postings

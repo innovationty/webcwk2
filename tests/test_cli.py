@@ -91,3 +91,74 @@ def test_handle_build_and_load(monkeypatch, capsys, tmp_path: Path) -> None:
     output = capsys.readouterr().out
     assert "Indexed 2 pages" in output
     assert str(fake_path) in output
+
+
+def test_shell_unknown_command_then_exit(monkeypatch, capsys) -> None:
+    commands = iter(["unknown", "exit"])
+    monkeypatch.setattr("builtins.input", lambda _: next(commands))
+
+    shell = SearchShell()
+    result = shell.run()
+
+    output = capsys.readouterr().out
+    assert result == 0
+    assert "Unknown command" in output
+
+
+def test_shell_handles_keyboard_interrupt(monkeypatch, capsys) -> None:
+    def fake_input(_: str) -> str:
+        raise KeyboardInterrupt()
+
+    monkeypatch.setattr("builtins.input", fake_input)
+
+    shell = SearchShell()
+    result = shell.run()
+
+    output = capsys.readouterr().out
+    assert result == 130
+    assert "Interrupted." in output
+
+
+def test_handle_print_usage_and_no_results(monkeypatch, capsys) -> None:
+    shell = SearchShell()
+    shell._handle_print([])
+
+    monkeypatch.setattr(shell.engine, "print_term", lambda term: {})
+    shell._handle_print(["missing"])
+
+    output = capsys.readouterr().out
+    assert "Usage: print <word>" in output
+    assert "No postings found." in output
+
+
+def test_handle_find_usage_and_no_suggestion(monkeypatch, capsys) -> None:
+    shell = SearchShell()
+    shell._handle_find([])
+
+    monkeypatch.setattr(shell.engine, "find", lambda query: [])
+    monkeypatch.setattr(shell.engine, "suggest", lambda query: [])
+    shell._handle_find(["missing"])
+
+    output = capsys.readouterr().out
+    assert "Usage: find <query>" in output
+    assert "No matches found." in output
+
+
+def test_handle_build_reports_errors(monkeypatch, capsys, tmp_path: Path) -> None:
+    shell = SearchShell()
+    fake_path = tmp_path / "search_index.json"
+
+    class FakeReport:
+        pages = [object()]
+        errors = {"https://example.test": "boom"}
+
+    monkeypatch.setattr(
+        shell.engine,
+        "build",
+        lambda output_path, on_page_crawled=None: (FakeReport(), fake_path),
+    )
+
+    shell._handle_build()
+
+    output = capsys.readouterr().out
+    assert "Completed with 1 crawl errors." in output
