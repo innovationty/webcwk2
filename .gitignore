@@ -1,0 +1,11 @@
+.pytest_cache/
+.coverage
+__pycache__/
+*.pyc
+dist/
+build/
+*.egg-info/
+.venv/
+index/
+.vscode/
+*.pdf

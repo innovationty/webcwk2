@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "search-tool-cwk2"
+version = "0.1.0"
+description = "Coursework 2 search engine tool for quotes.toscrape.com"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "beautifulsoup4>=4.13.5",
+    "requests>=2.32.5",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.4.2",
+    "pytest-cov>=7.0.0",
+]
+
+[tool.setuptools.packages.find]
+include = ["search_tool*"]
+
+[tool.pytest.ini_options]
+addopts = "--cov=search_tool --cov-report=term-missing"
+testpaths = ["tests"]
